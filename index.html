@@ -5,30 +5,31 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Jockey Whip Races</title>
 
-  <!-- PWA manifest and theme -->
-  <link rel="manifest" href="manifest.json" />
+  <!-- PWA manifest -->
+  <link rel="manifest" href="./manifest.json" />
   <meta name="theme-color" content="#0b6b3a" />
-  <meta name="mobile-web-app-capable" content="yes" />
+
+  <!-- iOS support -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Jockey Whip Races" />
-  <link rel="apple-touch-icon" href="assets/icon-192.png" />
+  <link rel="apple-touch-icon" href="./assets/icon-192.png" />
 
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="./style.css" />
 </head>
+
 <body>
   <header class="site-header">
     <div class="brand-wrap">
-      <img id="brandIcon" class="brand-icon" src="assets/jockey-icon.png" alt="Jockey icon" />
+      <img id="brandIcon" class="brand-icon" src="./assets/jockey-icon.png" alt="Jockey icon" />
       <div class="brand">Jockey Whip Races</div>
     </div>
-
     <div class="header-actions">
       <button id="newMeetingBtn" class="btn">New Meeting</button>
     </div>
   </header>
 
   <main class="main-grid" id="mainGrid">
-    <!-- LEFT: players + bet slip -->
+    <!-- LEFT -->
     <aside class="left-col">
       <div class="players-panel">
         <div class="panel-title">Players</div>
@@ -39,23 +40,23 @@
         </div>
       </div>
 
-      <div class="bet-slip" role="region" aria-label="Bet slip">
+      <div class="bet-slip">
         <div class="bet-slip-header">
           <div class="title">Bet Slip</div>
           <div class="active-player" id="activePlayerName">Player 1</div>
         </div>
 
         <div class="bet-controls">
-          <label for="betHorse">Horse</label>
+          <label>Horse</label>
           <select id="betHorse"></select>
 
-          <label for="betType">Type</label>
+          <label>Type</label>
           <select id="betType">
             <option value="win">Win</option>
             <option value="eachway">Each-way</option>
           </select>
 
-          <label for="betStake">Stake</label>
+          <label>Stake</label>
           <div class="stake-controls">
             <div class="stake-input">
               <button id="stakeMinus" class="btn small">-</button>
@@ -63,7 +64,7 @@
               <button id="stakePlus" class="btn small">+</button>
             </div>
 
-            <div id="stakePills" class="stake-pills" aria-label="Quick stake suggestions">
+            <div id="stakePills" class="stake-pills">
               <button class="pill-stake" data-value="5">£5</button>
               <button class="pill-stake" data-value="10">£10</button>
               <button class="pill-stake" data-value="15">£15</button>
@@ -86,13 +87,13 @@
       </div>
     </aside>
 
-    <!-- CENTER: race info above canvas + controls (Start, Replay, Fast, Next Race) -->
+    <!-- CENTER -->
     <section class="center-col">
-      <div class="meeting-panel" id="meetingPanelTop">
+      <div class="meeting-panel">
         <div class="meeting-title" id="meetingTitle">—</div>
         <div class="race-meta">
           <div id="raceInfo">—</div>
-          <div id="raceMeta" class="muted">—</div>
+          <div id="raceMeta">—</div>
         </div>
       </div>
 
@@ -104,13 +105,13 @@
         <button id="startRaceBtn" class="btn primary">Start Race</button>
         <button id="replayBtn" class="btn ghost">Replay</button>
         <button id="fastBtn" class="btn ghost">Fast</button>
-        <button id="nextRaceBtn" class="btn" aria-label="Next Race">Next Race</button>
+        <button id="nextRaceBtn" class="btn">Next Race</button>
       </div>
     </section>
 
-    <!-- RIGHT: racecard -->
+    <!-- RIGHT -->
     <aside class="right-col">
-      <div class="racecard" id="racecard">
+      <div class="racecard">
         <div class="racecard-header">
           <div class="title">Racecard</div>
           <div id="raceMetaSmall" class="muted"></div>
@@ -120,8 +121,8 @@
     </aside>
   </main>
 
-  <!-- Settlement modal -->
-  <div id="settlementModal" class="modal hidden" aria-hidden="true">
+  <!-- Settlement Modal -->
+  <div id="settlementModal" class="modal hidden">
     <div class="modal-card">
       <div class="modal-title">Settlement</div>
       <div id="settlementList" class="modal-body"></div>
@@ -131,30 +132,20 @@
     </div>
   </div>
 
-  <!-- Meeting overlay -->
-  <div id="meetingOverlay" class="overlay hidden" aria-hidden="true">
+  <!-- Meeting Overlay -->
+  <div id="meetingOverlay" class="overlay hidden">
     <div id="overlayCard" class="overlay-card">Now racing</div>
   </div>
 
-  <script src="app.js" defer></script>
+  <script src="./app.js" defer></script>
 
-  <!-- Service worker registration -->
+  <!-- Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(reg => {
-            // registration successful
-            console.log('ServiceWorker registered:', reg.scope);
-          })
-          .catch(err => {
-            console.warn('ServiceWorker registration failed:', err);
-          });
-      });
-
-      // optional: listen for updates and prompt user (basic)
-      navigator.serviceWorker?.addEventListener('controllerchange', () => {
-        console.log('Service worker controller changed');
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(reg => console.log('SW registered', reg.scope))
+          .catch(err => console.warn('SW failed', err));
       });
     }
   </script>
