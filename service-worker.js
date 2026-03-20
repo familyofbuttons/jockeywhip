@@ -1,13 +1,13 @@
 const CACHE_NAME = 'jockeywhip-v1';
 const PRECACHE = [
-  './',
-  './index.html',
-  './style.css',
-  './app.js',
-  './manifest.json',
-  './assets/jockey-icon.png',
-  './assets/icon-192.png',
-  './assets/icon-512.png'
+  '/jockeywhip/',
+  '/jockeywhip/index.html',
+  '/jockeywhip/style.css',
+  '/jockeywhip/app.js',
+  '/jockeywhip/manifest.json',
+  '/jockeywhip/assets/jockey-icon.png',
+  '/jockeywhip/assets/icon-192.png',
+  '/jockeywhip/assets/icon-512.png'
 ];
 
 self.addEventListener('install', event => {
@@ -28,10 +28,10 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const req = event.request;
 
-  // Navigation → network first, fallback to cache
+  // Navigation → network first, fallback to cached index
   if (req.mode === 'navigate') {
     event.respondWith(
-      fetch(req).catch(() => caches.match('./index.html'))
+      fetch(req).catch(() => caches.match('/jockeywhip/index.html'))
     );
     return;
   }
