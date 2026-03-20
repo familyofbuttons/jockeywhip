@@ -1,10 +1,7 @@
-/* Jockey Whip Races — full app logic
-   - Brand set to "Jockey Whip Races"
-   - Stamina hidden from UI
-   - Added Form stat (1–5)
-   - Added Expert Mode toggle
-   - Odds removed from animation visuals where requested
-   - Bets, players, and UI behavior preserved
+/* Jockey Whip Races — corrected full app.js
+   - Restored missing helper functions and correct ordering
+   - Expert Mode toggle, Form stat, stamina hidden from UI
+   - All UI IDs expected by the HTML are present
 */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,29 +10,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const GAME_TITLE = 'Jockey Whip Races';
   document.title = GAME_TITLE;
 
-  // ICON helper
   const ICON_PATH = 'assets/jockey-icon.png';
   const brandIconEl = document.getElementById('brandIcon');
   if (brandIconEl) {
     brandIconEl.src = ICON_PATH;
-    brandIconEl.addEventListener('error', () => {
-      brandIconEl.style.display = 'none';
-    });
+    brandIconEl.addEventListener('error', () => { brandIconEl.style.display = 'none'; });
   }
 
   const START_BANKROLL = 100;
   const MIN_BET = 5;
   const RACES_PER_MEETING = 6;
 
-  // -----------------------
-  // Underdog upset tuning
-  // -----------------------
   const UNDERDOG_BASE_BOOST_RATE = 0.02;
   const UNDERDOG_BOOST_MULTIPLIER = 4.0;
   const UNDERDOG_BOOST_MIN = 6;
   const UNDERDOG_BOOST_MAX = 18;
   const MAX_BOOSTED_PER_RACE = 2;
-  // -----------------------
 
   const MEETINGS = [
     { id: 'ascot', name: 'Ascot', color: '#0b3d91', theme: { primary: '#0b3d91' } },
@@ -82,9 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
     try { return JSON.parse(localStorage.getItem(MEETING_COUNT_KEY) || '{}'); }
     catch (e) { return {}; }
   }
-  function saveMeetingCounts(c) { try { localStorage.setItem(MEETING_COUNT_KEY, JSON.stringify(c)); } catch(e){} }
+  function saveMeetingCounts(c) { try { localStorage.setItem(MEETING_COUNT_KEY, JSON.stringify(c)); } catch (e){} }
 
-  // ⭐ Added expertMode to default state
   const defaultState = {
     meetingId: MEETINGS[1].id,
     players: [],
@@ -134,7 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const nextRaceBtn = $('nextRaceBtn');
   const newMeetingBtn = $('newMeetingBtn');
 
-  // ⭐ NEW: Expert Mode toggle button
   const expertToggle = $('expertToggle');
 
   const canvas = $('raceCanvas');
@@ -152,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function getMeeting(){ return MEETINGS.find(m => m.id === state.meetingId) || MEETINGS[1]; }
   function setActivePlayer(id){ state.ui.activePlayer = id; saveState(state); renderPlayers(); updateBetUI(); }
   function getActivePlayer(){ return state.players.find(p => p.id === state.ui.activePlayer) || state.players[0]; }
-  function formatMoney(n){ return '£' + n.toFixed(2); }
+  function formatMoney(n){ return '£' + Number(n || 0).toFixed(2); }
 
   function decimalToCommonFraction(decimal) {
     let best = COMMON_FRACTIONS[0];
@@ -171,8 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // -----------------------
   // genHorse / genRace
   // -----------------------
-
-  // ⭐ UPDATED: Added form, stamina still used internally but hidden from UI
   function genHorse(index) {
     const name = `${FIRST[randInt(0,FIRST.length-1)]} ${SECOND[randInt(0,SECOND.length-1)]}`;
     const trainer = TRAINERS[randInt(0,TRAINERS.length-1)];
@@ -183,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const consistency = randInt(40,90);
     const formBias = randInt(-6,6);
     const color = generateClothColor(index);
-    const form = randInt(1,5); // ⭐ NEW FORM STAT
+    const form = randInt(1,5); // NEW FORM STAT
 
     return {
       id: uid('h'),
@@ -200,8 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
       recent: [],
       position: null
     };
-  }
-  function genRace(numRunners) {
+  }  function genRace(numRunners) {
     const runnersCount = numRunners || randInt(6,10);
     const runners = [];
     for (let i=0;i<runnersCount;i++) runners.push(genHorse(i));
@@ -274,13 +259,84 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // -----------------------
+  // Restored helper functions (must be above UI code)
+  // -----------------------
+  function placeTermsForField(terms, fieldSize){
+    for (const t of terms) {
+      if (fieldSize >= t.min && fieldSize <= t.max) {
+        return { places: t.places, frac: t.frac };
+      }
+    }
+    return { places: 0, frac: 0 };
+  }
+
+  function computeCostAndEstimate(stake, type, runnerOdds, race){
+    stake = Number(stake) || 0;
+    const fieldSize = race.runners.length;
+    const terms = placeTermsForField(race.placeTerms, fieldSize);
+
+    if (type === 'win') {
+      const cost = stake;
+      const winReturn = stake * runnerOdds;
+      return { cost, winReturn, placeReturn: 0 };
+    } else if (type === 'eachway') {
+      const cost = stake * 2;
+      const winReturn = stake * runnerOdds;
+      const placeReturn = stake * (1 + runnerOdds * terms.frac);
+      return { cost, winReturn, placeReturn };
+    }
+    return { cost: 0, winReturn: 0, placeReturn: 0 };
+  }
+
+  function applyTheme(meeting) {
+    const root = document.documentElement;
+    if (meeting && meeting.theme && meeting.theme.primary) {
+      root.style.setProperty('--primary', meeting.theme.primary);
+    }
+    document.querySelectorAll('.player-card .player-bank')
+      .forEach(el => el.style.color = meeting.color);
+    if (overlayCard) overlayCard.style.color = meeting.theme.primary;
+    const betSlip = document.querySelector('.bet-slip');
+    if (betSlip) betSlip.style.borderTop = `4px solid ${meeting.color}`;
+    renderPlayers();
+    renderBetsBox();
+  }
+
+  function shadeColor(hex, percent) {
+    const num = parseInt(hex.replace('#',''),16);
+    const r = Math.max(0, Math.min(255, (num >> 16) + percent));
+    const g = Math.max(0, Math.min(255, ((num >> 8) & 0x00FF) + percent));
+    const b = Math.max(0, Math.min(255, (num & 0x0000FF) + percent));
+    return `rgb(${r},${g},${b})`;
+  }
+
+  function renderPlayers() {
+    if (!playersList) return;
+    playersList.innerHTML = '';
+    state.players.forEach(p => {
+      const div = document.createElement('div');
+      div.className = 'player-card' + (p.id === state.ui.activePlayer ? ' active' : '');
+      div.dataset.id = p.id;
+      div.innerHTML = `
+        <div class="player-info">
+          <div class="player-name" data-id="${p.id}">${p.name}</div>
+          <div class="player-bank" style="color:${getMeeting().color}">${formatMoney(p.bankroll)}</div>
+        </div>
+        <div class="player-actions">
+          <button class="btn small ghost" data-action="rename" data-id="${p.id}">Rename</button>
+        </div>
+      `;
+      playersList.appendChild(div);
+    });
+    if (activePlayerName) activePlayerName.textContent = getActivePlayer().name;
+    renderBetsBox();
+  }
+  // -----------------------
   // Expert Mode toggle logic
   // -----------------------
   if (expertToggle) {
     const updateExpertLabel = () => {
-      expertToggle.textContent = state.expertMode
-        ? 'Expert Mode: ON'
-        : 'Expert Mode: OFF';
+      expertToggle.textContent = state.expertMode ? 'Expert Mode: ON' : 'Expert Mode: OFF';
     };
     updateExpertLabel();
 
@@ -296,6 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Race UI (UPDATED)
   // -----------------------
   function renderRaceUI(race) {
+    if (!race) return;
     if (meetingTitle) meetingTitle.textContent = `${getMeeting().name} • ${race.type}`;
     if (raceInfo) raceInfo.textContent = `${race.distance} • ${race.fences} fences • ${race.weather} • ${race.temp}°C`;
     if (raceMeta) raceMeta.textContent = `Runners: ${race.runners.length}`;
@@ -311,10 +368,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ? `<span class="place-badge place-${r.position}">${r.position === 1 ? '1st' : r.position === 2 ? '2nd' : '3rd'}</span>`
         : '';
 
-      // ⭐ Form stars (1–5)
       const formStars = '★'.repeat(r.form) + '☆'.repeat(5 - r.form);
 
-      // ⭐ Expert Mode shows real stats (except stamina)
       const rightMeta = state.expertMode
         ? `spd ${r.speed} • jump ${r.jumpSkill} • cons ${r.consistency}`
         : `form ${formStars}`;
@@ -344,6 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateBetUI();
   }
+
   function updateBetUI() {
     const player = getActivePlayer();
     if (activePlayerName) activePlayerName.textContent = player.name;
@@ -366,6 +422,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderBetsBox() {
+    if (!betsBox) return;
     betsBox.innerHTML = '';
     const meetingColor = getMeeting().color;
     const header = document.createElement('div');
@@ -421,17 +478,19 @@ document.addEventListener('DOMContentLoaded', () => {
       betsBox.appendChild(empty);
     }
   }
-
-  betsBox.addEventListener('click', (e) => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    const action = btn.dataset.action;
-    if (action === 'delete-bet') {
-      const playerId = btn.dataset.player;
-      const betId = btn.dataset.bet;
-      deleteBet(playerId, betId);
-    }
-  });
+  // Bets box interactions
+  if (betsBox) {
+    betsBox.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const action = btn.dataset.action;
+      if (action === 'delete-bet') {
+        const playerId = btn.dataset.player;
+        const betId = btn.dataset.bet;
+        deleteBet(playerId, betId);
+      }
+    });
+  }
 
   function deleteBet(playerId, betId) {
     const p = state.players.find(x => x.id === playerId);
@@ -446,70 +505,74 @@ document.addEventListener('DOMContentLoaded', () => {
     renderBetsBox();
   }
 
-  addPlayerBtn.addEventListener('click', () => {
-    if (state.players.length >= 6) return alert('Max 6 players');
-    const id = uid('p');
-    const name = `Player ${state.players.length + 1}`;
-    state.players.push({ id, name, bankroll: START_BANKROLL, bets: [] });
-    setActivePlayer(id);
-    saveState(state);
-  });
+  // Player controls
+  if (addPlayerBtn) {
+    addPlayerBtn.addEventListener('click', () => {
+      if (state.players.length >= 6) return alert('Max 6 players');
+      const id = uid('p');
+      const name = `Player ${state.players.length + 1}`;
+      state.players.push({ id, name, bankroll: START_BANKROLL, bets: [] });
+      setActivePlayer(id);
+      saveState(state);
+    });
+  }
 
-  resetPlayersBtn.addEventListener('click', () => {
-    if (!confirm('Reset players and bankrolls?')) return;
-    state.players = [{ id: 'p1', name: 'Player 1', bankroll: START_BANKROLL, bets: [] }];
-    state.ui.activePlayer = state.players[0].id;
-    saveState(state);
-    renderPlayers();
-  });
+  if (resetPlayersBtn) {
+    resetPlayersBtn.addEventListener('click', () => {
+      if (!confirm('Reset players and bankrolls?')) return;
+      state.players = [{ id: 'p1', name: 'Player 1', bankroll: START_BANKROLL, bets: [] }];
+      state.ui.activePlayer = state.players[0].id;
+      saveState(state);
+      renderPlayers();
+    });
+  }
 
-  stakeMinus.addEventListener('click', () => {
-    betStake.value = Math.max(MIN_BET, Number(betStake.value) - 5);
-    updateBetUI();
-  });
-  stakePlus.addEventListener('click', () => {
-    betStake.value = Math.max(MIN_BET, Number(betStake.value) + 5);
-    updateBetUI();
-  });
-  betStake.addEventListener('input', updateBetUI);
-  betType.addEventListener('change', updateBetUI);
+  // Bet stake controls
+  if (stakeMinus) stakeMinus.addEventListener('click', () => { betStake.value = Math.max(MIN_BET, Number(betStake.value) - 5); updateBetUI(); });
+  if (stakePlus) stakePlus.addEventListener('click', () => { betStake.value = Math.max(MIN_BET, Number(betStake.value) + 5); updateBetUI(); });
+  if (betStake) betStake.addEventListener('input', updateBetUI);
+  if (betType) betType.addEventListener('change', updateBetUI);
   if (betHorse) betHorse.addEventListener('change', updateBetUI);
 
-  placeBetBtn.addEventListener('click', () => {
-    const player = getActivePlayer();
-    const race = currentRace;
-    if (!race) return alert('No race loaded');
-    const stake = Number(betStake.value) || MIN_BET;
-    if (stake < MIN_BET) return alert(`Minimum bet is £${MIN_BET}`);
-    const type = betType.value;
-    const runnerId = betHorse && betHorse.value ? betHorse.value : race.runners[0].id;
-    const runner = race.runners.find(r => r.id === runnerId);
-    const calc = computeCostAndEstimate(stake, type, runner.odds, race);
-    if (player.bankroll < calc.cost) return alert('Insufficient funds');
-    player.bankroll -= calc.cost;
-    const bet = {
-      id: uid('bet'),
-      raceId: race.id,
-      meetingId: state.meetingId,
-      runnerId,
-      type,
-      stakePerPart: stake,
-      totalStake: calc.cost,
-      odds: runner.odds,
-      settled: false
-    };
-    player.bets.push(bet);
-    saveState(state);
-    renderPlayers();
-    renderBetsBox();
-    updateBetUI();
-  });
+  if (placeBetBtn) {
+    placeBetBtn.addEventListener('click', () => {
+      const player = getActivePlayer();
+      const race = currentRace;
+      if (!race) return alert('No race loaded');
+      const stake = Number(betStake.value) || MIN_BET;
+      if (stake < MIN_BET) return alert(`Minimum bet is £${MIN_BET}`);
+      const type = betType.value;
+      const runnerId = betHorse && betHorse.value ? betHorse.value : race.runners[0].id;
+      const runner = race.runners.find(r => r.id === runnerId);
+      const calc = computeCostAndEstimate(stake, type, runner.odds, race);
+      if (player.bankroll < calc.cost) return alert('Insufficient funds');
+      player.bankroll -= calc.cost;
+      const bet = {
+        id: uid('bet'),
+        raceId: race.id,
+        meetingId: state.meetingId,
+        runnerId,
+        type,
+        stakePerPart: stake,
+        totalStake: calc.cost,
+        odds: runner.odds,
+        settled: false
+      };
+      player.bets.push(bet);
+      saveState(state);
+      renderPlayers();
+      renderBetsBox();
+      updateBetUI();
+    });
+  }
 
-  nextPlayerBtn.addEventListener('click', () => {
-    const idx = state.players.findIndex(p => p.id === state.ui.activePlayer);
-    const next = state.players[(idx + 1) % state.players.length];
-    setActivePlayer(next.id);
-  });
+  if (nextPlayerBtn) {
+    nextPlayerBtn.addEventListener('click', () => {
+      const idx = state.players.findIndex(p => p.id === state.ui.activePlayer);
+      const next = state.players[(idx + 1) % state.players.length];
+      setActivePlayer(next.id);
+    });
+  }
 
   function updateCanvasForScale(scale, runnersCount) {
     const ratio = window.devicePixelRatio || 1;
@@ -549,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = '#fff';
     ctx.fillRect(w - 180*scale, trackY, 6*scale, trackH);
 
-    const fenceCount = currentRace.fences || 0;
+    const fenceCount = currentRace && currentRace.fences ? currentRace.fences : 0;
     for (let f=0; f<fenceCount; f++){
       const fx = trackX + Math.floor((trackW - 140*scale) * (f+1) / (fenceCount+1));
       const hedgeW = 18 * scale;
@@ -750,7 +813,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     replayStep();
   }
-
   function assignPlaceForHorse(horseId) {
     if (!animState) return;
     const horse = animState.horses.find(h => h.id === horseId);
@@ -781,7 +843,6 @@ document.addEventListener('DOMContentLoaded', () => {
       ? `<span class="place-badge place-${runner.position}">${runner.position === 1 ? '1st' : runner.position === 2 ? '2nd' : '3rd'}</span>`
       : '';
 
-    // ⭐ UPDATED: stamina removed from UI
     const formStars = '★'.repeat(runner.form) + '☆'.repeat(5 - runner.form);
     const rightMeta = state.expertMode
       ? `spd ${runner.speed} • jump ${runner.jumpSkill} • cons ${runner.consistency}`
@@ -801,6 +862,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
   }
+
   function stepAnim(){
     if (!animState) return;
     animState.t++;
@@ -995,25 +1057,19 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.closePath();
   }
 
-  function animLoop(){
-    stepAnim();
-    renderAnim();
-    if (!animState.finished) animationId = requestAnimationFrame(animLoop);
-  }
+  function animLoop(){ stepAnim(); renderAnim(); if (!animState.finished) animationId = requestAnimationFrame(animLoop); }
 
-  function startRace(){
-    if (!currentRace) return;
+  function startRace(){ 
+    if (!currentRace) return; 
     currentRace.runners.forEach(r => { r.position = null; r.fallen = false; });
-    initAnim(currentRace);
-    if (animationId) cancelAnimationFrame(animationId);
-    animationId = requestAnimationFrame(animLoop);
+    initAnim(currentRace); 
+    if (animationId) cancelAnimationFrame(animationId); 
+    animationId = requestAnimationFrame(animLoop); 
   }
 
   function finalizeRace(){
     if (!animState) return;
-
     const finished = animState.horses.slice().sort((a,b) => b.x - a.x);
-
     finished.forEach((h) => {
       if (!h.fallen && !h.position && animState.nextPlace <= 3) {
         h.position = animState.nextPlace;
@@ -1022,14 +1078,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    currentRace.result = finished.map(h => ({
-      id: h.id,
-      name: h.name,
-      fallen: !!h.fallen,
-      position: h.position || null,
-      x: h.x
-    }));
-
+    currentRace.result = finished.map(h => ({ id: h.id, name: h.name, fallen: !!h.fallen, position: h.position || null, x: h.x }));
     currentRace.runners.forEach(r => {
       const found = currentRace.result.find(h => h.id === r.id);
       if (found) {
@@ -1054,24 +1103,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function settleBetsForRace(race){
     if (!race || !race.result) return [];
-    const finishOrder = race.result
-      .filter(r => !r.fallen)
-      .sort((a,b) => {
-        const pa = a.position || 999, pb = b.position || 999;
-        if (pa !== pb) return pa - pb;
-        return (b.x || 0) - (a.x || 0);
-      })
-      .map(r => r.id);
+    const finishOrder = race.result.filter(r => !r.fallen).sort((a,b) => {
+      const pa = a.position || 999, pb = b.position || 999;
+      if (pa !== pb) return pa - pb;
+      return (b.x || 0) - (a.x || 0);
+    }).map(r => r.id);
 
     const terms = placeTermsForField(race.placeTerms, race.runners.length);
     const messages = [];
 
     state.players.forEach(p => {
       let playerTotalWin = 0;
-
       p.bets.forEach(b => {
         if (b.settled || b.raceId !== race.id) return;
-
         const posIndex = finishOrder.indexOf(b.runnerId);
 
         if (b.type === 'win') {
@@ -1096,9 +1140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         b.settled = true;
       });
 
-      if (playerTotalWin > 0) {
-        messages.push({ player: p.name, amount: playerTotalWin });
-      }
+      if (playerTotalWin > 0) messages.push({ player: p.name, amount: playerTotalWin });
     });
 
     saveState(state);
@@ -1107,42 +1149,27 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showSettlementModal(messages){
+    if (!settlementList) return;
     settlementList.innerHTML = '';
-
     if (!messages || messages.length === 0) {
-      const row = document.createElement('div');
-      row.className='modal-row';
-      row.textContent='No winning bets this race.';
-      settlementList.appendChild(row);
+      const row = document.createElement('div'); row.className='modal-row'; row.textContent='No winning bets this race.'; settlementList.appendChild(row);
     } else {
       messages.forEach(m => {
-        const row = document.createElement('div');
-        row.className='modal-row';
+        const row = document.createElement('div'); row.className='modal-row';
         row.innerHTML = `<div style="font-weight:700">${m.player}</div><div style="font-weight:700">${formatMoney(m.amount)}</div>`;
         settlementList.appendChild(row);
       });
     }
-
-    settlementModal.classList.remove('hidden');
-    settlementModal.setAttribute('aria-hidden','false');
-    settlementOk.focus();
-  }
-
-  function hideSettlementModal(){
-    settlementModal.classList.add('hidden');
-    settlementModal.setAttribute('aria-hidden','true');
-  }
-
-  settlementOk.addEventListener('click', hideSettlementModal);
-  settlementModal.addEventListener('click', (e) => {
-    if (e.target === settlementModal) hideSettlementModal();
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && settlementModal && !settlementModal.classList.contains('hidden')) {
-      hideSettlementModal();
+    if (settlementModal) {
+      settlementModal.classList.remove('hidden'); settlementModal.setAttribute('aria-hidden','false'); settlementOk && settlementOk.focus();
     }
-  });
+  }
+
+  function hideSettlementModal(){ if (settlementModal) { settlementModal.classList.add('hidden'); settlementModal.setAttribute('aria-hidden','true'); } }
+
+  settlementOk && settlementOk.addEventListener('click', hideSettlementModal);
+  settlementModal && settlementModal.addEventListener('click', (e) => { if (e.target === settlementModal) hideSettlementModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && settlementModal && !settlementModal.classList.contains('hidden')) hideSettlementModal(); });
 
   function incrementMeetingRaceCountAndMaybeRotate() {
     const mid = state.meetingId;
@@ -1151,21 +1178,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (meetingCounts[mid] >= RACES_PER_MEETING) {
       const reset = confirm(`${getMeeting().name} has completed ${RACES_PER_MEETING} races.\n\nPress OK to reset all players' bankrolls to £${START_BANKROLL} for the next meeting.\nPress Cancel to carry over current bankrolls.`);
-
       if (reset) {
         state.players.forEach(p => { p.bankroll = START_BANKROLL; p.bets = []; });
       }
-
       const current = state.meetingId;
       const others = MEETINGS.filter(m => m.id !== current);
       const pick = others[randInt(0, others.length - 1)];
-
       state.meetingId = pick.id;
       meetingCounts[pick.id] = 0;
-
       saveMeetingCounts(meetingCounts);
       saveState(state);
-
       applyTheme(pick);
 
       currentRace = genRace();
@@ -1180,23 +1202,20 @@ document.addEventListener('DOMContentLoaded', () => {
         overlayCard.style.fontSize = '34px';
         overlayCard.style.fontWeight = '900';
       }
-
       if (meetingOverlay) {
         meetingOverlay.classList.remove('hidden');
         meetingOverlay.setAttribute('aria-hidden','false');
       }
-
       setTimeout(() => {
         if (meetingOverlay) {
           meetingOverlay.classList.add('hidden');
           meetingOverlay.setAttribute('aria-hidden','true');
         }
       }, 1600);
-
     }
   }
 
-  nextRaceBtn.addEventListener('click', () => {
+  nextRaceBtn && nextRaceBtn.addEventListener('click', () => {
     state.players.forEach(p => { p.bets = []; });
     renderBetsBox();
 
@@ -1211,16 +1230,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (betStake) betStake.value = MIN_BET;
     if (betType) betType.value = 'win';
     if (betHorse) betHorse.selectedIndex = 0;
-
     updateBetUI();
+
     saveState(state);
   });
 
-  newMeetingBtn.addEventListener('click', () => {
+  newMeetingBtn && newMeetingBtn.addEventListener('click', () => {
     const current = state.meetingId;
     const others = MEETINGS.filter(m => m.id !== current);
     const pick = others[randInt(0, others.length - 1)];
-
     state.meetingId = pick.id;
     saveState(state);
     applyTheme(pick);
@@ -1239,12 +1257,10 @@ document.addEventListener('DOMContentLoaded', () => {
       overlayCard.style.fontSize = '34px';
       overlayCard.style.fontWeight = '900';
     }
-
     if (meetingOverlay) {
       meetingOverlay.classList.remove('hidden');
       meetingOverlay.setAttribute('aria-hidden','false');
     }
-
     setTimeout(() => {
       if (meetingOverlay) {
         meetingOverlay.classList.add('hidden');
@@ -1258,16 +1274,41 @@ document.addEventListener('DOMContentLoaded', () => {
     if (betStake) betStake.value = MIN_BET;
     if (betType) betType.value = 'win';
     if (betHorse) betHorse.selectedIndex = 0;
-
     updateBetUI();
   });
+
+  function initStakePills() {
+    const stakePillsContainer = document.getElementById('stakePills');
+    if (!stakePillsContainer) return;
+
+    const pills = Array.from(stakePillsContainer.querySelectorAll('.pill-stake'));
+    function clearActive() { pills.forEach(p => p.classList.remove('active')); }
+
+    pills.forEach(p => {
+      p.addEventListener('click', () => {
+        const v = Number(p.dataset.value) || 5;
+        if (betStake) betStake.value = v;
+        clearActive();
+        p.classList.add('active');
+        updateBetUI();
+      });
+    });
+
+    if (betStake) {
+      betStake.addEventListener('input', () => {
+        clearActive();
+        updateBetUI();
+      });
+    }
+  }
 
   function initUI(){
     applyTheme(getMeeting());
     renderPlayers();
     currentRace = genRace();
     renderRaceUI(currentRace);
-    saveState(state);    updateBetUI();
+    saveState(state);
+    updateBetUI();
     renderBetsBox();
     updateCanvasForScale(1, currentRace.runners.length);
     initStakePills();
@@ -1312,31 +1353,6 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('No replay available. Run a race first.');
       }
     });
-  }
-
-  function initStakePills() {
-    const stakePillsContainer = document.getElementById('stakePills');
-    if (!stakePillsContainer) return;
-
-    const pills = Array.from(stakePillsContainer.querySelectorAll('.pill-stake'));
-    function clearActive() { pills.forEach(p => p.classList.remove('active')); }
-
-    pills.forEach(p => {
-      p.addEventListener('click', () => {
-        const v = Number(p.dataset.value) || 5;
-        if (betStake) betStake.value = v;
-        clearActive();
-        p.classList.add('active');
-        updateBetUI();
-      });
-    });
-
-    if (betStake) {
-      betStake.addEventListener('input', () => {
-        clearActive();
-        updateBetUI();
-      });
-    }
   }
 
   initUI();
