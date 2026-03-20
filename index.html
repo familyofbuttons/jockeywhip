@@ -5,7 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="mobile-web-app-capable" content="yes">
   <title>Jockey Whip Races</title>
-  <link rel="stylesheet" href="styles.css">
+
+  <!-- FIXED: Correct filename (style.css, not styles.css) -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Optional but recommended for PWAs -->
+  <link rel="manifest" href="manifest.json">
 </head>
 
 <body>
@@ -20,7 +25,7 @@
       <button id="nextRaceBtn" class="btn primary">Next Race</button>
       <button id="newMeetingBtn" class="btn ghost">New Meeting</button>
 
-      <!-- ⭐ NEW: Expert Mode toggle -->
+      <!-- Expert Mode toggle -->
       <button id="expertToggle" class="btn small ghost">Expert Mode: OFF</button>
     </div>
   </header>
@@ -113,5 +118,6 @@
   </div>
 
   <script src="app.js"></script>
+  <script src="service-worker.js"></script>
 </body>
 </html>
