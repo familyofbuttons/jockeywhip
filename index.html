@@ -6,21 +6,21 @@
   <title>Jockey Whip Races</title>
 
   <!-- PWA manifest -->
-  <link rel="manifest" href="./manifest.json" />
+  <link rel="manifest" href="/jockeywhip/manifest.json" />
   <meta name="theme-color" content="#0b6b3a" />
 
   <!-- iOS support -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Jockey Whip Races" />
-  <link rel="apple-touch-icon" href="./assets/icon-192.png" />
+  <link rel="apple-touch-icon" href="/jockeywhip/assets/icon-192.png" />
 
-  <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="/jockeywhip/style.css" />
 </head>
 
 <body>
   <header class="site-header">
     <div class="brand-wrap">
-      <img id="brandIcon" class="brand-icon" src="./assets/jockey-icon.png" alt="Jockey icon" />
+      <img id="brandIcon" class="brand-icon" src="/jockeywhip/assets/jockey-icon.png" alt="Jockey icon" />
       <div class="brand">Jockey Whip Races</div>
     </div>
     <div class="header-actions">
@@ -137,13 +137,13 @@
     <div id="overlayCard" class="overlay-card">Now racing</div>
   </div>
 
-  <script src="./app.js" defer></script>
+  <script src="/jockeywhip/app.js" defer></script>
 
   <!-- Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js')
+        navigator.serviceWorker.register('/jockeywhip/service-worker.js')
           .then(reg => console.log('SW registered', reg.scope))
           .catch(err => console.warn('SW failed', err));
       });
