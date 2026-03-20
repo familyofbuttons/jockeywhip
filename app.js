@@ -1267,4 +1267,78 @@ document.addEventListener('DOMContentLoaded', () => {
     renderPlayers();
     currentRace = genRace();
     renderRaceUI(currentRace);
-    saveState(state);
+    saveState(state);    updateBetUI();
+    renderBetsBox();
+    updateCanvasForScale(1, currentRace.runners.length);
+    initStakePills();
+
+    meetingCounts[state.meetingId] = meetingCounts[state.meetingId] || 0;
+    saveMeetingCounts(meetingCounts);
+
+    (function enforceLayoutOrder(){
+      const left = document.querySelector('.left-col');
+      const center = document.querySelector('.center-col');
+      const right = document.querySelector('.right-col');
+      if (!left || !center || !right) return;
+      const main = document.querySelector('.main-grid');
+      if (main) {
+        main.innerHTML = '';
+        main.appendChild(left);
+        main.appendChild(center);
+        main.appendChild(right);
+      }
+    })();
+  }
+
+  function onWindowResize(){
+    const scale = animState && animState.scale ? animState.scale : 1;
+    const runners = currentRace && currentRace.runners ? currentRace.runners.length : 10;
+    updateCanvasForScale(scale, runners);
+  }
+  window.addEventListener('resize', onWindowResize);
+
+  if (startRaceBtn) {
+    startRaceBtn.addEventListener('click', () => {
+      if (speedMultiplier !== 2) speedMultiplier = 0.5;
+      startRace();
+    });
+  }
+
+  if (replayBtn) {
+    replayBtn.addEventListener('click', () => {
+      if (lastRaceRecording && lastRaceRecording.frames && lastRaceRecording.frames.length) {
+        playRecording(lastRaceRecording);
+      } else {
+        alert('No replay available. Run a race first.');
+      }
+    });
+  }
+
+  function initStakePills() {
+    const stakePillsContainer = document.getElementById('stakePills');
+    if (!stakePillsContainer) return;
+
+    const pills = Array.from(stakePillsContainer.querySelectorAll('.pill-stake'));
+    function clearActive() { pills.forEach(p => p.classList.remove('active')); }
+
+    pills.forEach(p => {
+      p.addEventListener('click', () => {
+        const v = Number(p.dataset.value) || 5;
+        if (betStake) betStake.value = v;
+        clearActive();
+        p.classList.add('active');
+        updateBetUI();
+      });
+    });
+
+    if (betStake) {
+      betStake.addEventListener('input', () => {
+        clearActive();
+        updateBetUI();
+      });
+    }
+  }
+
+  initUI();
+});
+
