@@ -1,153 +1,117 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="mobile-web-app-capable" content="yes">
   <title>Jockey Whip Races</title>
-
-  <!-- PWA manifest -->
-  <link rel="manifest" href="/jockeywhip/manifest.json" />
-  <meta name="theme-color" content="#0b6b3a" />
-
-  <!-- iOS support -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-title" content="Jockey Whip Races" />
-  <link rel="apple-touch-icon" href="/jockeywhip/assets/icon-192.png" />
-
-  <link rel="stylesheet" href="/jockeywhip/style.css" />
+  <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-  <header class="site-header">
-    <div class="brand-wrap">
-      <img id="brandIcon" class="brand-icon" src="/jockeywhip/assets/jockey-icon.png" alt="Jockey icon" />
-      <div class="brand">Jockey Whip Races</div>
+
+  <header class="top-bar">
+    <div class="brand-area">
+      <img id="brandIcon" class="brand-icon" src="assets/jockey-icon.png" alt="">
+      <span class="brand">Jockey Whip Races</span>
     </div>
-    <div class="header-actions">
-      <button id="newMeetingBtn" class="btn">New Meeting</button>
+
+    <div class="controls">
+      <button id="nextRaceBtn" class="btn primary">Next Race</button>
+      <button id="newMeetingBtn" class="btn ghost">New Meeting</button>
+
+      <!-- ⭐ NEW: Expert Mode toggle -->
+      <button id="expertToggle" class="btn small ghost">Expert Mode: OFF</button>
     </div>
   </header>
 
-  <main class="main-grid" id="mainGrid">
-    <!-- LEFT -->
-    <aside class="left-col">
-      <div class="players-panel">
-        <div class="panel-title">Players</div>
-        <div id="playersList" class="players-list"></div>
-        <div class="players-actions">
-          <button id="addPlayerBtn" class="btn small">Add Player</button>
-          <button id="resetPlayersBtn" class="btn small ghost">Reset</button>
-        </div>
+  <div class="main-grid">
+
+    <!-- LEFT COLUMN -->
+    <div class="left-col">
+      <h2>Players</h2>
+      <div id="playersList"></div>
+
+      <div class="player-controls">
+        <button id="addPlayerBtn" class="btn small">Add Player</button>
+        <button id="resetPlayersBtn" class="btn small ghost">Reset Players</button>
       </div>
 
+      <h3>Bet Slip</h3>
       <div class="bet-slip">
-        <div class="bet-slip-header">
-          <div class="title">Bet Slip</div>
-          <div class="active-player" id="activePlayerName">Player 1</div>
-        </div>
-
-        <div class="bet-controls">
+        <div class="bet-row">
           <label>Horse</label>
           <select id="betHorse"></select>
+        </div>
 
+        <div class="bet-row">
           <label>Type</label>
           <select id="betType">
             <option value="win">Win</option>
-            <option value="eachway">Each-way</option>
+            <option value="eachway">Each Way</option>
           </select>
+        </div>
 
+        <div class="bet-row">
           <label>Stake</label>
-          <div class="stake-controls">
-            <div class="stake-input">
-              <button id="stakeMinus" class="btn small">-</button>
-              <input id="betStake" type="number" min="5" value="5" />
-              <button id="stakePlus" class="btn small">+</button>
-            </div>
-
-            <div id="stakePills" class="stake-pills">
-              <button class="pill-stake" data-value="5">£5</button>
-              <button class="pill-stake" data-value="10">£10</button>
-              <button class="pill-stake" data-value="15">£15</button>
-              <button class="pill-stake" data-value="20">£20</button>
-            </div>
-          </div>
-
-          <div class="bet-estimates">
-            <div id="betCost">Cost: £0</div>
-            <div id="betEstimate">Estimate: £0</div>
-          </div>
-
-          <div class="bet-actions">
-            <button id="placeBetBtn" class="btn primary">Place Bet</button>
-            <button id="nextPlayerBtn" class="btn ghost">Next Player</button>
-          </div>
+          <input id="betStake" type="number" value="5" min="5">
+          <button id="stakeMinus" class="btn tiny ghost">-</button>
+          <button id="stakePlus" class="btn tiny ghost">+</button>
         </div>
 
-        <div id="betsBox" class="bets-box"></div>
-      </div>
-    </aside>
-
-    <!-- CENTER -->
-    <section class="center-col">
-      <div class="meeting-panel">
-        <div class="meeting-title" id="meetingTitle">—</div>
-        <div class="race-meta">
-          <div id="raceInfo">—</div>
-          <div id="raceMeta">—</div>
+        <div id="stakePills" class="stake-pills">
+          <div class="pill-stake" data-value="5">£5</div>
+          <div class="pill-stake" data-value="10">£10</div>
+          <div class="pill-stake" data-value="20">£20</div>
         </div>
+
+        <div id="betCost" class="meta">Cost: £0</div>
+        <div id="betEstimate" class="meta">Estimate: £0</div>
+
+        <button id="placeBetBtn" class="btn primary">Place Bet</button>
+        <button id="nextPlayerBtn" class="btn small ghost">Next Player</button>
       </div>
 
-      <div class="canvas-wrap">
-        <canvas id="raceCanvas"></canvas>
-      </div>
+      <h3>Bets</h3>
+      <div id="betsBox"></div>
+    </div>
 
-      <div class="controls controls-center">
+    <!-- CENTER COLUMN -->
+    <div class="center-col">
+      <h2 id="meetingTitle"></h2>
+      <div id="raceInfo" class="meta"></div>
+      <div id="raceMeta" class="meta"></div>
+
+      <canvas id="raceCanvas"></canvas>
+
+      <div class="race-controls">
         <button id="startRaceBtn" class="btn primary">Start Race</button>
         <button id="replayBtn" class="btn ghost">Replay</button>
-        <button id="fastBtn" class="btn ghost">Fast</button>
-        <button id="nextRaceBtn" class="btn">Next Race</button>
       </div>
-    </section>
+    </div>
 
-    <!-- RIGHT -->
-    <aside class="right-col">
-      <div class="racecard">
-        <div class="racecard-header">
-          <div class="title">Racecard</div>
-          <div id="raceMetaSmall" class="muted"></div>
-        </div>
-        <div id="racecardList" class="racecard-list"></div>
-      </div>
-    </aside>
-  </main>
+    <!-- RIGHT COLUMN -->
+    <div class="right-col">
+      <h2>Racecard</h2>
+      <div id="racecardList"></div>
+    </div>
+
+  </div>
 
   <!-- Settlement Modal -->
-  <div id="settlementModal" class="modal hidden">
-    <div class="modal-card">
-      <div class="modal-title">Settlement</div>
-      <div id="settlementList" class="modal-body"></div>
-      <div class="modal-actions">
-        <button id="settlementOk" class="btn primary">OK</button>
-      </div>
+  <div id="settlementModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-content">
+      <h3>Race Results</h3>
+      <div id="settlementList"></div>
+      <button id="settlementOk" class="btn primary">OK</button>
     </div>
   </div>
 
   <!-- Meeting Overlay -->
-  <div id="meetingOverlay" class="overlay hidden">
-    <div id="overlayCard" class="overlay-card">Now racing</div>
+  <div id="meetingOverlay" class="overlay hidden" aria-hidden="true">
+    <div id="overlayCard" class="overlay-card"></div>
   </div>
 
-  <script src="/jockeywhip/app.js" defer></script>
-
-  <!-- Service Worker -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/jockeywhip/service-worker.js')
-          .then(reg => console.log('SW registered', reg.scope))
-          .catch(err => console.warn('SW failed', err));
-      });
-    }
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
