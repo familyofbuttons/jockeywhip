@@ -1,195 +1,248 @@
-:root{
-  --primary:#0b6b3a;
-  --bg:#f7fafc;
-  --muted:#6b7280;
-  --card:#ffffff;
-  --glass: rgba(255,255,255,0.9);
-  --radius:14px;
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  color-scheme: light;
+/* ------------------------------
+   Jockey Whip Races — styles.css
+   Complete UI stylesheet
+   ------------------------------ */
+
+:root {
+  --primary: #0b3d91;
+  --muted: #6b7280;
+  --bg: #f7fafc;
+  --card-bg: #ffffff;
+  --border: #e5e7eb;
+  --radius: 8px;
+  --shadow: 0 1px 2px rgba(0,0,0,0.06);
 }
 
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:#0f172a}
-
-/* Header brand + icon */
-.brand-wrap{
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-.brand-icon{
-  width:44px;
-  height:44px;
-  object-fit:cover;
-  border-radius:10px;
-  box-shadow:0 6px 18px rgba(2,6,23,0.08);
-  border:2px solid rgba(255,255,255,0.6);
-  background:linear-gradient(180deg,#fff,#f3f7f5);
-  flex:0 0 44px;
+/* Reset */
+* {
+  box-sizing: border-box;
 }
 
-/* Slightly tighten header spacing for the new icon */
-.site-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:12px 18px;
-  background:linear-gradient(90deg,#fff,#fbfdff);
-  border-bottom:1px solid rgba(2,6,23,0.04);
-}
-.brand{font-weight:800;font-size:20px;color:var(--primary);line-height:1}
-.header-actions{display:flex;gap:8px}
-
-/* Three-column grid: left (players/bets), center (canvas), right (racecard) */
-.main-grid{
-  display:grid;
-  grid-template-columns: 320px 1fr 360px;
-  gap:18px;
-  padding:18px;
-  max-width:1400px;
-  margin:18px auto;
-  align-items:start;
+body {
+  margin: 0;
+  background: var(--bg);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color: #111;
 }
 
-/* Left column */
-.left-col{display:flex;flex-direction:column;gap:12px}
-
-/* Center column */
-.center-col{display:flex;flex-direction:column;gap:12px;align-items:stretch}
-
-/* Right column */
-.right-col{display:flex;flex-direction:column;gap:12px}
-
-/* Meeting panel (now above canvas) */
-.meeting-panel{
-  background:var(--card);
-  border-radius:12px;
-  padding:14px 16px;
-  box-shadow:0 6px 18px rgba(2,6,23,0.04);
-  display:flex;
-  flex-direction:column;
-  gap:6px;
+/* Top bar */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
 }
-.meeting-title{
-  font-weight:900;
-  font-size:18px;
-  letter-spacing:0.2px;
-}
-.race-meta{display:flex;gap:12px;color:var(--muted);font-size:13px}
 
-/* Canvas area */
-.canvas-wrap{
-  background:transparent;border-radius:12px;overflow:hidden;flex:0 0 auto;
-  min-height:420px;display:flex;align-items:center;justify-content:center;
-  border:1px solid rgba(2,6,23,0.03);background:linear-gradient(180deg,#f8fafc,#ffffff);
+.brand-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-canvas{width:100%;height:420px;display:block;border-radius:12px;background:transparent}
 
-/* Controls centered under canvas */
-.controls-center{display:flex;gap:8px;justify-content:center;margin-top:8px}
-
-/* Next Race button uses theme color (var(--primary)) */
-#nextRaceBtn{
-  background:var(--primary);
-  color:#fff;
-  border:none;
-  border-radius:12px;
-  padding:10px 14px;
-  font-weight:800;
-  box-shadow:0 8px 20px rgba(11,107,58,0.12);
+.brand-icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
 }
-#nextRaceBtn:hover{filter:brightness(1.05);transform:translateY(-2px)}
+
+.controls {
+  display: flex;
+  gap: 8px;
+}
+
+/* Layout */
+.main-grid {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.left-col,
+.center-col,
+.right-col {
+  background: var(--card-bg);
+  padding: 12px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.left-col {
+  width: 260px;
+}
+
+.center-col {
+  flex: 1;
+}
+
+.right-col {
+  width: 320px;
+}
+
+/* Buttons */
+.btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn.primary {
+  background: var(--primary);
+  color: #fff;
+  border-color: transparent;
+}
+
+.btn.ghost {
+  background: #fff;
+  color: #111;
+}
+
+.btn.small {
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.btn.tiny {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+/* Cards */
+.player-card,
+.runner-card,
+.bet-item {
+  background: #fff;
+  padding: 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.player-card.active {
+  border-color: var(--primary);
+}
 
 /* Racecard */
-.racecard{background:var(--card);border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(2,6,23,0.04);max-height:760px;overflow:auto}
-.racecard-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.racecard-list{display:flex;flex-direction:column;gap:8px}
-.runner-card{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;background:linear-gradient(90deg,rgba(255,255,255,0.98),rgba(250,250,250,0.95));border:1px solid rgba(2,6,23,0.03)}
-.runner-swatch{width:18px;height:18px;border-radius:4px;display:inline-block;margin-right:8px}
-.place-badge{padding:4px 8px;border-radius:999px;font-weight:800;font-size:12px}
-.place-1{background:#ffd700;color:#111}
-.place-2{background:#c0c0c0;color:#111}
-.place-3{background:#cd7f32;color:#111}
-
-/* Players panel */
-.players-panel{background:var(--card);border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(2,6,23,0.04)}
-.players-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-.player-card{
-  display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:10px;background:linear-gradient(90deg,#fff,#fbfdff);border:1px solid rgba(2,6,23,0.03);
-  transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-}
-/* Active player: colored border and stronger shadow to make selection obvious */
-.player-card.active{
-  box-shadow:0 12px 30px rgba(11,107,58,0.12);
-  transform:translateY(-2px);
-  border:2px solid var(--primary);
-  background:linear-gradient(90deg, rgba(255,255,255,0.98), rgba(250,255,250,0.98));
+.runner-swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  display: inline-block;
 }
 
-/* Also highlight the player name itself with a pill border */
-.player-card .player-info { display:flex; flex-direction:column; gap:4px; }
-.player-card .player-name {
-  font-weight:800;
-  padding:6px 10px;
-  border-radius:999px;
-  transition:background .12s ease, border-color .12s ease;
-}
-.player-card.active .player-name {
-  border:2px solid var(--primary);
-  background: rgba(11,107,58,0.06);
+.place-badge {
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 12px;
+  margin-left: 4px;
 }
 
-/* Bet slip (pill-like) */
-.bet-slip{background:var(--glass);border-radius:18px;padding:14px;box-shadow:0 10px 30px rgba(2,6,23,0.06);border:1px solid rgba(2,6,23,0.04)}
-.bet-slip-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.bet-slip .title{font-weight:800}
-.bet-controls{display:flex;flex-direction:column;gap:10px}
-.bet-controls label{font-size:12px;color:var(--muted);font-weight:700}
-.bet-controls select{padding:8px;border-radius:999px;border:1px solid rgba(2,6,23,0.06);font-weight:700}
-.stake-controls{display:flex;flex-direction:column;gap:8px}
-.stake-input{display:flex;align-items:center;gap:8px}
-.btn{background:#fff;border:1px solid rgba(2,6,23,0.06);padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:700}
-.btn.small{padding:6px 8px;border-radius:10px;font-size:13px}
-.btn.ghost{background:transparent;border:1px solid rgba(2,6,23,0.06)}
-.btn.primary{background:var(--primary);color:#fff;border:none;border-radius:12px;padding:10px 14px}
-.stake-input input[type="number"]{border-radius:999px;padding:8px 12px;border:1px solid rgba(2,6,23,0.06);width:84px;text-align:center;font-weight:800}
+.place-1 { background: #ffd700; }
+.place-2 { background: #c0c0c0; }
+.place-3 { background: #cd7f32; }
 
-/* Stake pills */
-.stake-pills{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
-.pill-stake{border:none;padding:8px 12px;border-radius:999px;background:rgba(2,6,23,0.06);color:#0f172a;font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(2,6,23,0.04)}
-.pill-stake:hover{transform:translateY(-2px)}
-.pill-stake.active{background:var(--primary);color:#fff;box-shadow:0 10px 30px rgba(11,107,58,0.14)}
-
-/* Bets box */
-/* removed visible outline/border for placed bets for a cleaner look */
-.bets-box{margin-top:12px}
-.bet-item{
-  border-radius:999px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:12px;
-  background:linear-gradient(90deg,rgba(255,255,255,0.95),rgba(255,255,255,0.85));
-  border: none;
-  box-shadow: 0 6px 18px rgba(2,6,23,0.04);
+/* Meta text */
+.meta {
+  color: var(--muted);
+  font-size: 13px;
 }
 
-/* Modal & overlay */
-.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,0.35);z-index:60}
-.modal.hidden{display:none}
-.modal-card{background:var(--card);padding:18px;border-radius:12px;min-width:320px;box-shadow:0 20px 60px rgba(2,6,23,0.12)}
-.modal-title{font-weight:800;margin-bottom:8px}
-.modal-body{max-height:260px;overflow:auto}
-.modal-actions{display:flex;justify-content:flex-end;margin-top:12px}
+/* Bet slip */
+.bet-slip {
+  border-top: 4px solid var(--primary);
+  padding-top: 12px;
+}
 
-/* Meeting overlay */
-.overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:80;pointer-events:none}
-.overlay.hidden{display:none}
-.overlay-card{background:var(--card);padding:22px 28px;border-radius:12px;font-weight:900;font-size:28px;box-shadow:0 30px 80px rgba(2,6,23,0.18);pointer-events:auto;}
+.bet-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
 
-/* Responsive */
-@media (max-width:1100px){
-  .main-grid{grid-template-columns: 1fr; padding:12px}
-  .left-col{order:1}
-  .center-col{order:2}
-  .right-col{order:3}
-  canvas{height:320px}
-  .overlay-card{font-size:22px;padding:18px}
+.stake-pills {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.pill-stake {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.pill-stake.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* Canvas */
+canvas {
+  width: 100%;
+  height: 360px;
+  background: transparent;
+  border-radius: var(--radius);
+  display: block;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 16px;
+  border-radius: var(--radius);
+  width: 320px;
+}
+
+.modal-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+/* Overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.overlay-card {
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: var(--radius);
+  font-size: 32px;
+  font-weight: 900;
 }
